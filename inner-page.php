@@ -43,7 +43,7 @@
     <div class="container d-flex align-items-center justify-content-between">
 
       <div class="logo">
-        <h1><a href="index.html">Bocor<span>.</span></a></h1>
+        <h1><a href="index.php">Bocor<span>.</span></a></h1>
         <!-- Uncomment below if you prefer to use an image logo -->
         <!-- <a href="index.php"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
       </div>
@@ -90,7 +90,7 @@
         <div class="d-flex justify-content-between align-items-center">
           <h2>Inner Page</h2>
           <ol>
-            <li><a href="index.html">Home</a></li>
+            <li><a href="index.php">Home</a></li>
             <li>Inner Page</li>
           </ol>
         </div>

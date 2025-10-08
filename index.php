@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>SIFAR</title>
+  <title>JAWAZI</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -24,9 +24,7 @@
   <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
   <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
   <link href="assets/css/style.css" rel="stylesheet">
-  <!-- Link Swiper's CSS -->
-  <link rel="stylesheet" href="swiper-8.4.4/package/swiper-bundle.min.css" />
-  <script src="swiper-8.4.4/package/swiper-bundle.min.js"></script>
+
 </head>
 
 <body>
@@ -36,7 +34,7 @@
     <div class="container d-flex align-items-center justify-content-between" dir="rtl">
 
       <div class="logo">
-        <h1><a dir="rtl" href="index.html"><span>.</span>Sifar</a></h1>
+        <h1><a dir="rtl" href="index.php"><span>.</span>jawazi</a></h1>
         <!-- Uncomment below if you prefer to use an image logo -->
         <!-- <a href="index.php"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
       </div>
@@ -62,7 +60,7 @@
       <div dir="rtl" class=" col-lg-6 py-5 py-lg-0 order-2 order-lg-1" data-aos="fade-right">
         <h1 style="font-family: 'Almarai', sans-serif;">اطلب جواز سفرك بسهولة عبر منصتنا</h1>
         <h2 style="font-family: 'Almarai', sans-serif;">خدمة إلكترونية موثوقة وسريعة من مصلحة الهجرة والجوازات</h2>
-        <a href="" class="btn-get-started scrollto">اطلب جوازك</a>
+        <a href="login.php" class="btn-get-started scrollto">اطلب جوازك</a>
       </div>
       <div class="col-lg-6 order-1 order-lg-2  my-5 hero-img " data-aos="fade-left">
         <img src="assets/img/جواز-سفر-اليمن-scaled-1-780x470-removebg-preview.png"  alt="">
@@ -187,7 +185,7 @@
 
         <div class="row  justify-content-center">
             <div class="col-lg-6">
-                <h3>SIFAR</h3>
+                <h3>JAWAZI</h3>
                 <p dir="rtl" style="font-family: 'Almarai', sans-serif;" >
                     نعمل جاهدين لتسهيل حصولك على جواز السفر بسرعة وأمان. يسعدنا تواصلك معنا أو اشتراكك في تنبيهات الموقع
                     لمتابعة أحدث التحديثات والخدمات. آراؤك واقتراحاتك تهمنا لتحسين تجربتك دائمًا.
@@ -217,7 +215,7 @@
 
     <div class="container footer-bottom clearfix">
       <div class="copyright">
-        &copy; Copyright <strong><span>sifar</span></strong>. All Rights Reserved
+        &copy; Copyright <strong><span>jawazi</span></strong>. All Rights Reserved
       </div>
       <div class="credits">
 
