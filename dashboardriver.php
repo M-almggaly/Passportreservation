@@ -28,56 +28,90 @@ $stmt = $pdo->prepare("
 $stmt->execute();
 $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['save_modal'])) {
 
     $request_id       = isset($_POST['request_id']) ? $_POST['request_id'] : '';
     $passport_number  = isset($_POST['passport_number']) ? $_POST['passport_number'] : '';
     $place_of_issue   = isset($_POST['place_of_issue']) ? $_POST['place_of_issue'] : '';
-    $issue_date  = isset($_POST['issue_date']) ? $_POST['issue_date'] : '';
-    $expiry_date  = isset($_POST['expiry_date']) ? $_POST['expiry_date'] : '';
+    $issue_date       = isset($_POST['issue_date']) ? $_POST['issue_date'] : '';
+    $expiry_date      = isset($_POST['expiry_date']) ? $_POST['expiry_date'] : '';
     $status           = isset($_POST['status']) ? $_POST['status'] : '';
+    $rejection_reason = isset($_POST['rejection_reason']) ? $_POST['rejection_reason'] : null;
 
-    if(!empty($request_id)) {
+    if (!empty($request_id)) {
+
         // جلب applicant_id من passport_requests
         $stmt = $pdo->prepare("SELECT applicant_id FROM passport_requests WHERE id = ?");
         $stmt->execute([$request_id]);
         $applicant = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if($applicant) {
+        if ($applicant) {
             $applicant_id = $applicant['applicant_id'];
 
-            // تحقق إذا السجل موجود في passports
-            $check = $pdo->prepare("SELECT id FROM passports WHERE applicant_id = ?");
-            $check->execute([$applicant_id]);
-            $exists = $check->fetch(PDO::FETCH_ASSOC);
+            // إذا كان هناك سبب رفض
+            if (!empty($rejection_reason)) {
 
-            if($exists) {
-                // تحديث بيانات الجواز
-                $stmt2 = $pdo->prepare("
-                    UPDATE passports SET 
-                        passport_number = ?, 
-                        place_of_issue = ?, 
-                        issue_date = ?, 
-                        expiry_date = ?
-                    WHERE applicant_id = ?
-                ");
-                $stmt2->execute([$passport_number, $place_of_issue, $issue_date, $expiry_date, $applicant_id]);
+                // فقط تحديث الحالة وسبب الرفض
+                $stmt3 = $pdo->prepare("UPDATE passport_requests SET status = ?, rejection_reason = ? WHERE id = ?");
+                $stmt3->execute([$status, $rejection_reason, $request_id]);
+
             } else {
-                // إدخال سجل جديد
-                $stmt2 = $pdo->prepare("
-                    INSERT INTO passports (applicant_id, passport_number, place_of_issue, issue_date, expiry_date)
-                    VALUES (?, ?, ?, ?, ?)
-                ");
-                $stmt2->execute([$applicant_id, $passport_number, $place_of_issue, $issue_date, $expiry_date]);
-            }
 
-            // تحديث الحالة في passport_requests
-            $stmt3 = $pdo->prepare("UPDATE passport_requests SET status = ? WHERE id = ?");
-            $stmt3->execute([$status, $request_id]);
+                // تحقق إذا السجل موجود في passports
+                $check = $pdo->prepare("SELECT id FROM passports WHERE applicant_id = ?");
+                $check->execute([$applicant_id]);
+                $exists = $check->fetch(PDO::FETCH_ASSOC);
+
+                if ($exists) {
+                    // تحديث بيانات الجواز
+                    $stmt2 = $pdo->prepare("
+                        UPDATE passports SET 
+                            passport_number = ?, 
+                            place_of_issue = ?, 
+                            issue_date = ?, 
+                            expiry_date = ?
+                        WHERE applicant_id = ?
+                    ");
+                    $stmt2->execute([$passport_number, $place_of_issue, $issue_date, $expiry_date, $applicant_id]);
+                } else {
+                    // إدخال سجل جديد
+                    $stmt2 = $pdo->prepare("
+                        INSERT INTO passports (applicant_id, passport_number, place_of_issue, issue_date, expiry_date)
+                        VALUES (?, ?, ?, ?, ?)
+                    ");
+                    $stmt2->execute([$applicant_id, $passport_number, $place_of_issue, $issue_date, $expiry_date]);
+                }
+
+                // تحديث الحالة فقط (بدون سبب رفض)
+                $stmt3 = $pdo->prepare("UPDATE passport_requests SET status = ?, rejection_reason = NULL WHERE id = ?");
+                $stmt3->execute([$status, $request_id]);
+            }
 
             echo "<script>alert('✅ تم حفظ التغييرات بنجاح'); window.location.href=window.location.href;</script>";
             exit;
+        }
+    }
+}
+
+// ✅ حذف الطلب حسب id
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['delete_request'])) {
+    $request_id = $_POST['delete_request'];
+
+    if (!empty($request_id)) {
+        // تحقق أن الطلب موجود قبل الحذف
+        $check = $pdo->prepare("SELECT id FROM passport_requests WHERE id = ?");
+        $check->execute([$request_id]);
+        $exists = $check->fetch(PDO::FETCH_ASSOC);
+
+        if ($exists) {
+            // حذف السجل
+            $delete = $pdo->prepare("DELETE FROM passport_requests WHERE id = ?");
+            $delete->execute([$request_id]);
+
+            echo "<script>alert('🗑️ تم حذف الطلب بنجاح'); window.location.href=window.location.href;</script>";
+            exit;
+        } else {
+            echo "<script>alert('❌ لم يتم العثور على الطلب المطلوب');</script>";
         }
     }
 }
@@ -114,6 +148,10 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>JAWAZI</title>
     <meta content="" name="description">
     <meta content="" name="keywords">
+
+    <!--Favicons-->
+    <link href="assets/img/logo.png" rel="icon">
+    <link href="assets/img/logo.png" rel="apple-touch-icon">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
@@ -371,7 +409,8 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <td><?php echo htmlspecialchars($row['place_of_birth']); ?></td>
                         <td><?php echo htmlspecialchars($row['address']); ?></td>
                         <td><span class="badge bg-warning text-dark"><?php echo htmlspecialchars($row['status']); ?></span></td>
-                        <td>
+                        <td class="text-center" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <!-- زر عرض الطلب -->
                             <button class="btn btn-primary view-request-btn"
                                     data-request-id="<?= $row['request_id']; ?>"
                                     data-fullname="<?= $row['full_name']; ?>"
@@ -382,17 +421,23 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     data-passport-issued="<?= isset($row['issue_date']) ? $row['issue_date'] : ''; ?>"
                                     data-passport-expiry="<?= isset($row['expiry_date']) ? $row['expiry_date'] : ''; ?>"
                                     data-passport-place="<?= isset($row['place_of_issue']) ? $row['place_of_issue'] : ''; ?>"
+                                    data-rejection_reason="<?= isset($row['rejection_reason']) ? $row['rejection_reason'] : ''; ?>"
                                     data-status="<?= $row['status']; ?>">
                                 عرض الطلب
                             </button>
 
-
-
-
-
-
-
+                            <!-- زر الحذف (أيقونة فقط بدون خلفية) -->
+                            <form method="POST" style="display:inline;"
+                                  onsubmit="return confirm('هل أنت متأكد أنك تريد حذف هذا الطلب؟');">
+                                <input type="hidden" name="delete_request" value="<?= htmlspecialchars($row['request_id']); ?>">
+                                <button type="submit"
+                                        title="حذف الطلب"
+                                        style="background:none; border:none; color:#dc3545; font-size:18px; cursor:pointer;">
+                                    🗑️
+                                </button>
+                            </form>
                         </td>
+
                     </tr>
                 <?php endforeach; ?>
             <?php else: ?>
@@ -439,25 +484,25 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <!-- رقم الجواز -->
                             <div class="col-md-6 text-center">
                                 <label class="form-label fw-bold">رقم الجواز</label>
-                                <input type="number" name="passport_number" id="modal-passport-number" class="form-control text-center">
+                                <input type="number" name="passport_number" id="modal-passport-number" class="form-control text-center" required>
                             </div>
 
                             <!-- مكان إصدار الجواز -->
                             <div class="col-md-6 text-center">
                                 <label class="form-label fw-bold">مكان إصدار الجواز</label>
-                                <input type="text" name="place_of_issue" id="modal-passport-place" class="form-control text-center">
+                                <input type="text" name="place_of_issue" id="modal-passport-place" class="form-control text-center" required>
                             </div>
 
                             <!-- تاريخ إصدار الجواز -->
                             <div class="col-md-6 text-center">
                                 <label class="form-label fw-bold">تاريخ إصدار الجواز</label>
-                                <input type="date" name="issue_date" id="modal-passport-issued" class="form-control text-center">
+                                <input type="date" name="issue_date" id="modal-passport-issued" class="form-control text-center" required>
                             </div>
 
                             <!-- تاريخ انتهاء الجواز -->
                             <div class="col-md-6 text-center">
                                 <label class="form-label fw-bold">تاريخ انتهاء الجواز</label>
-                                <input type="date" name="expiry_date" id="modal-passport-expiry" class="form-control text-center">
+                                <input type="date" name="expiry_date" id="modal-passport-expiry" class="form-control text-center" required>
                             </div>
 
                             <!-- تغيير حالة الطلب -->
@@ -470,6 +515,12 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <option value="مرفوض">مرفوض</option>
                                 </select>
                             </div>
+                            <!-- سبب الرفض (يظهر فقط إذا تم اختيار مرفوض) -->
+                            <div class="col-md-12 text-center mt-3" id="rejection-reason-container" style="display: none;">
+                                <label class="form-label fw-bold">سبب الرفض</label>
+                                <textarea name="rejection_reason" id="rejection-reason" class="form-control text-center" rows="3" placeholder="اكتب سبب الرفض هنا..."></textarea>
+                            </div>
+
                         </div>
                     </div>
 
@@ -483,12 +534,24 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+
             const viewButtons = document.querySelectorAll('.view-request-btn');
             const modalEl = document.getElementById('viewRequestModal');
             const modal = new bootstrap.Modal(modalEl);
 
+            const rejectionContainer = document.getElementById('rejection-reason-container');
+            const rejectionTextarea = document.getElementById('rejection-reason');
+
+            const passportFields = [
+                'modal-passport-number',
+                'modal-passport-place',
+                'modal-passport-issued',
+                'modal-passport-expiry'
+            ];
+
             viewButtons.forEach(btn => {
                 btn.addEventListener('click', function () {
+
                     document.getElementById('modal-request-id').value = btn.dataset.requestId;
                     document.getElementById('modal-fullname').value = btn.dataset.fullname;
                     document.getElementById('modal-identity').value = btn.dataset.identity;
@@ -498,15 +561,36 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     document.getElementById('modal-passport-issued').value = btn.dataset.passportIssued;
                     document.getElementById('modal-passport-expiry').value = btn.dataset.passportExpiry;
                     document.getElementById('modal-passport-place').value = btn.dataset.passportPlace;
+                    rejectionTextarea.value = btn.dataset.rejection_reason || '';
                     document.getElementById('modal-status').value = btn.dataset.status;
 
+                    // إظهار سبب الرفض إذا كانت الحالة "مرفوض"
+                    if (btn.dataset.status === 'مرفوض') {
+                        rejectionContainer.style.display = 'block';
+                        passportFields.forEach(id => document.getElementById(id).disabled = true);
+                    } else {
+                        rejectionContainer.style.display = 'none';
+                        passportFields.forEach(id => document.getElementById(id).disabled = false);
+                    }
 
-                // فتح المودل
+                    // عرض المودال
                     modal.show();
                 });
             });
+
+            // إظهار / إخفاء سبب الرفض عند تغيير الحالة داخل المودال
+            document.getElementById('modal-status').addEventListener('change', function() {
+                if (this.value === 'مرفوض') {
+                    rejectionContainer.style.display = 'block';
+                    passportFields.forEach(id => document.getElementById(id).disabled = true);
+                } else {
+                    rejectionContainer.style.display = 'none';
+                    passportFields.forEach(id => document.getElementById(id).disabled = false);
+                }
+            });
         });
     </script>
+
 </main>
 <script>
     // قائمة المستخدم

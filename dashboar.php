@@ -85,6 +85,10 @@ function getCount($array, $key) {
     <meta content="" name="description">
     <meta content="" name="keywords">
 
+    <!--Favicons-->
+    <link href="assets/img/logo.png" rel="icon">
+    <link href="assets/img/logo.png" rel="apple-touch-icon">
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 

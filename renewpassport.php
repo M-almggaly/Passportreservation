@@ -81,7 +81,28 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['save_modal'])) {
         }
     }
 }
+// ✅ حذف الطلب حسب id
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['delete_request'])) {
+    $request_id = $_POST['delete_request'];
 
+    if (!empty($request_id)) {
+        // تحقق أن الطلب موجود قبل الحذف
+        $check = $pdo->prepare("SELECT id FROM passport_requests WHERE id = ?");
+        $check->execute([$request_id]);
+        $exists = $check->fetch(PDO::FETCH_ASSOC);
+
+        if ($exists) {
+            // حذف السجل
+            $delete = $pdo->prepare("DELETE FROM passport_requests WHERE id = ?");
+            $delete->execute([$request_id]);
+
+            echo "<script>alert('🗑️ تم حذف الطلب بنجاح'); window.location.href=window.location.href;</script>";
+            exit;
+        } else {
+            echo "<script>alert('❌ لم يتم العثور على الطلب المطلوب');</script>";
+        }
+    }
+}
 // ✅ جلب الطلبات التي حالتها "في انتظار الموافقة" مع بيانات applicant
 $query = "
     SELECT 
@@ -120,6 +141,10 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>JAWAZI</title>
     <meta content="" name="description">
     <meta content="" name="keywords">
+
+    <!--Favicons-->
+    <link href="assets/img/logo.png" rel="icon">
+    <link href="assets/img/logo.png" rel="apple-touch-icon">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
@@ -380,8 +405,8 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <td><?php echo htmlspecialchars($row['issue_date']); ?></td>
                         <td><?php echo htmlspecialchars($row['expiry_date']); ?></td>
                         <td><span class="badge bg-warning text-dark"><?php echo htmlspecialchars($row['status']); ?></span></td>
-                        <td>
-                            <button class="btn btn-primary view-request-btn"
+                        <td class="text-center" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <button class="btn btn-primary view-request-btn"
                                     data-request-id="<?= $row['request_id']; ?>"
                                     data-fullname="<?= $row['full_name']; ?>"
                                     data-identity="<?= $row['identity_number']; ?>"
@@ -394,13 +419,16 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     data-status="<?= $row['status']; ?>">
                                 عرض الطلب
                             </button>
-
-
-
-
-
-
-
+                            <!-- زر الحذف (أيقونة فقط بدون خلفية) -->
+                            <form method="POST" style="display:inline;"
+                                  onsubmit="return confirm('هل أنت متأكد أنك تريد حذف هذا الطلب؟');">
+                                <input type="hidden" name="delete_request" value="<?= htmlspecialchars($row['request_id']); ?>">
+                                <button type="submit"
+                                        title="حذف الطلب"
+                                        style="background:none; border:none; color:#dc3545; font-size:18px; cursor:pointer;">
+                                    🗑️
+                                </button>
+                            </form>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -448,25 +476,25 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <!-- رقم الجواز -->
                             <div class="col-md-6 text-center">
                                 <label class="form-label fw-bold">رقم الجواز</label>
-                                <input type="number" name="passport_number" id="modal-passport-number" class="form-control text-center">
+                                <input type="number" name="passport_number" id="modal-passport-number" class="form-control text-center" required>
                             </div>
 
                             <!-- مكان إصدار الجواز -->
                             <div class="col-md-6 text-center">
                                 <label class="form-label fw-bold">مكان إصدار الجواز</label>
-                                <input type="text" name="place_of_issue" id="modal-passport-place" class="form-control text-center">
+                                <input type="text" name="place_of_issue" id="modal-passport-place" class="form-control text-center" required >
                             </div>
 
                             <!-- تاريخ إصدار الجواز -->
                             <div class="col-md-6 text-center">
                                 <label class="form-label fw-bold">تاريخ إصدار الجواز</label>
-                                <input type="date" name="issue_date" id="modal-passport-issued" class="form-control text-center">
+                                <input type="date" name="issue_date" id="modal-passport-issued" class="form-control text-center" required>
                             </div>
 
                             <!-- تاريخ انتهاء الجواز -->
                             <div class="col-md-6 text-center">
                                 <label class="form-label fw-bold">تاريخ انتهاء الجواز</label>
-                                <input type="date" name="expiry_date" id="modal-passport-expiry" class="form-control text-center">
+                                <input type="date" name="expiry_date" id="modal-passport-expiry" class="form-control text-center" required>
                             </div>
 
                             <!-- تغيير حالة الطلب -->

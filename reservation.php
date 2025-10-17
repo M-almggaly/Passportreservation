@@ -37,17 +37,20 @@ $stmtNotif = $pdo->prepare("
     SELECT COUNT(*) AS new_count
     FROM passport_requests pr
     INNER JOIN applicants a ON pr.applicant_id = a.id
-    WHERE a.user_id = :user_id AND pr.notified = 0
+ WHERE a.user_id = :user_id 
+  AND pr.status NOT IN ('في انتظار الموافقة', 'انتظار التجديد')
+
 ");
 $stmtNotif->execute(['user_id' => $userId]);
 $notifCount = $stmtNotif->fetch(PDO::FETCH_ASSOC)['new_count'];
 
 // جلب تفاصيل الإشعارات
 $stmtNotifs = $pdo->prepare("
-    SELECT pr.id, pr.status, pr.request_date, a.full_name
+    SELECT pr.id, pr.status, pr.request_date, a.full_name , pr.rejection_reason
     FROM passport_requests pr
     INNER JOIN applicants a ON pr.applicant_id = a.id
-    WHERE a.user_id = :user_id AND pr.notified = 0
+  WHERE a.user_id = :user_id 
+  AND pr.status NOT IN ('في انتظار الموافقة', 'انتظار التجديد')
     ORDER BY pr.request_date DESC
 ");
 $stmtNotifs->execute(['user_id' => $userId]);
@@ -243,9 +246,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST['logout']) && !isset(
   <meta content="" name="description">
   <meta content="" name="keywords">
 
-<!--Favicons-->
-<!--  <link href="assets/img/jar-with-fresh-honey (1).jpg" rel="icon">-->
-<!--  <link href="assets/img/jar-with-fresh-honey (1).jpg" rel="apple-touch-icon"> -->
+    <!--Favicons-->
+    <link href="assets/img/logo.png" rel="icon">
+    <link href="assets/img/logo.png" rel="apple-touch-icon">
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
@@ -314,13 +317,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST['logout']) && !isset(
                             <span id="notifDot" class="blink-dot"></span>
                         <?php endif; ?>
                     </button>
+
                     <ul id="notifMenu" class="dropdown-menu dropdown-menu-end shadow p-2 text-end" style="min-width: 300px;">
                         <?php
                         if ($notifCount > 0) {
                             foreach ($notifs as $notif) {
-                                echo '<li class="dropdown-item d-flex justify-content-between align-items-center">';
+                                // تحديد لون البادج حسب الحالة
+                                $badgeClass = 'bg-primary';
+                                if ($notif['status'] === 'مرفوض') {
+                                    $badgeClass = 'bg-danger';
+                                }
+
+                                echo '<li class="dropdown-item">';
+                                echo '<div class="d-flex justify-content-center align-items-center gap-2">';
                                 echo '<span>طلب #' . $notif['id'] . ' - ' . htmlspecialchars($notif['full_name']) . '</span>';
-                                echo '<span class="badge bg-primary">' . $notif['status'] . '</span>';
+                                echo '<span class="text-muted small">' . $notif['request_date'] . '</span>';
+                                echo '<span class="badge ' . $badgeClass . '">' . $notif['status'] . '</span>';
+                                echo '</div>';
+
+                                // الرسائل حسب الحالة
+                                if ($notif['status'] === 'تمت الموافقة') {
+                                    echo '<div class="mt-1 text-success small fw-bold">يرجى الذهاب بعد أسبوع من إصدار الموافقة إلى أقرب مقر للخدمة المدنية لاستلام جوازك.</div>';
+                                } elseif ($notif['status'] === 'تمت التجديد') {
+                                    echo '<div class="mt-1 text-primary small fw-bold">يرجى الذهاب بعد أسبوع من إصدار التجديد إلى أقرب مقر للخدمة المدنية لاستلام جوازك المجدد.</div>';
+                                } elseif ($notif['status'] === 'مرفوض' && !empty($notif['rejection_reason'])) {
+                                    echo '<div class="mt-1 text-danger small fw-bold">' . htmlspecialchars($notif['rejection_reason']) . '</div>';
+                                }
+
                                 echo '</li>';
                             }
                         } else {
@@ -328,7 +351,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST['logout']) && !isset(
                         }
                         ?>
                     </ul>
+
                 </div>
+
             </div>
 
         </div>
@@ -417,7 +442,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST['logout']) && !isset(
                     <select name="gender" class="form-control" required>
                         <option value="">اختر الجنس</option>
                         <option value="ذكر">ذكر</option>
-                        <option value="أنثى">أنثى</option>
+                        <option value="أنثى                                             ">أنثى</option>
                     </select>
                 </div>
 

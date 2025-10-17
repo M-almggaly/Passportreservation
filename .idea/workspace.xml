@@ -5,24 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5b6d57c9-e5ca-41aa-9e63-37841851f049" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/assets/img/profile.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dashboar.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dashboardriver.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dashboarduser.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/db.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fetch_notifications.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/login.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mark_notified.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/register.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/renewpassport.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reservation.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/laravel-idea.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/assets/css/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/inner-page.php" beforeDir="false" afterPath="$PROJECT_DIR$/inner-page.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/portfolio-details.php" beforeDir="false" afterPath="$PROJECT_DIR$/portfolio-details.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dashboardriver.php" beforeDir="false" afterPath="$PROJECT_DIR$/dashboardriver.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dashboarduser.php" beforeDir="false" afterPath="$PROJECT_DIR$/dashboarduser.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.php" beforeDir="false" afterPath="$PROJECT_DIR$/index.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/renewpassport.php" beforeDir="false" afterPath="$PROJECT_DIR$/renewpassport.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reservation.php" beforeDir="false" afterPath="$PROJECT_DIR$/reservation.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,7 +76,10 @@
       <workItem from="1759818158744" duration="16574000" />
       <workItem from="1759839937305" duration="220000" />
       <workItem from="1759844252252" duration="4608000" />
-      <workItem from="1759916397889" duration="4171000" />
+      <workItem from="1759916397889" duration="4925000" />
+      <workItem from="1760033832349" duration="5763000" />
+      <workItem from="1760123795250" duration="2000" />
+      <workItem from="1760178014989" duration="4000" />
     </task>
     <servers />
   </component>

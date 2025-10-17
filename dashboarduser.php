@@ -53,6 +53,29 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $stmt = $pdo->prepare($query);
 $stmt->execute();
 $allRequests = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// ✅ حذف المستخدم حسب id
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['delete_request'])) {
+    $user_id = $_POST['delete_request'];
+
+    if (!empty($user_id)) {
+        // تحقق أن المستخدم موجود قبل الحذف
+        $check = $pdo->prepare("SELECT id FROM users WHERE id = ?");
+        $check->execute([$user_id]);
+        $exists = $check->fetch(PDO::FETCH_ASSOC);
+
+        if ($exists) {
+            // حذف السجل
+            $delete = $pdo->prepare("DELETE FROM users WHERE id = ?");
+            $delete->execute([$user_id]);
+
+            echo "<script>alert('🗑️ تم حذف المستخدم بنجاح'); window.location.href=window.location.href;</script>";
+            exit;
+        } else {
+            echo "<script>alert('❌ لم يتم العثور على المستخدم');</script>";
+        }
+    }
+}
+
 // ✅ حفظ التعديلات على بيانات المستخدم
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
     $userId = $_POST['user_id'];
@@ -111,6 +134,10 @@ function getCount($array, $key) {
     <title>JAWAZI</title>
     <meta content="" name="description">
     <meta content="" name="keywords">
+
+    <!--Favicons-->
+    <link href="assets/img/logo.png" rel="icon">
+    <link href="assets/img/logo.png" rel="apple-touch-icon">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
@@ -353,8 +380,8 @@ function getCount($array, $key) {
                         <td><?= htmlspecialchars($user['name']); ?></td>
                         <td><?= htmlspecialchars($user['email']); ?></td>
                         <td><?= htmlspecialchars($user['phone_number']); ?></td>
-                        <td>
-                            <button
+                        <td class="text-center" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <button
                                     class="btn btn-primary edit-user-btn"
                                     data-id="<?= $user['id']; ?>"
                                     data-name="<?= htmlspecialchars($user['name']); ?>"
@@ -363,6 +390,17 @@ function getCount($array, $key) {
                             >
                                 تعديل
                             </button>
+                            <!-- زر الحذف (أيقونة فقط بدون خلفية) -->
+                            <form method="POST" style="display:inline;"
+                                  onsubmit="return confirm('هل أنت متأكد أنك تريد حذف هذا المستخدم؟');">
+                                <input type="hidden" name="delete_request" value="<?= htmlspecialchars($user['id']); ?>">
+                                <button type="submit"
+                                        title="حذف المستخدم"
+                                        style="background:none; border:none; color:#dc3545; font-size:18px; cursor:pointer;">
+                                    🗑️
+                                </button>
+                            </form>
+
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -404,12 +442,12 @@ function getCount($array, $key) {
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">كلمة المرور الجديدة</label>
-                            <input type="password" name="password" id="modal-password" class="form-control" minlength="6">
+                            <input type="password" name="password" id="modal-password" class="form-control" minlength="6" required>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">تأكيد كلمة المرور</label>
-                            <input type="password" id="modal-password-confirm" class="form-control" minlength="6">
+                            <input type="password" id="modal-password-confirm" class="form-control" minlength="6" required>
                         </div>
                     </div>
 
